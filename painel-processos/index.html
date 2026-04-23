@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Processos — Scozziero Advocacia</title>
+  <style>
+    :root {
+      --cor-primaria: #1a2b4a;
+      --cor-secundaria: #2d4a7a;
+      --cor-destaque: #c8a84b;
+      --cor-urgente: #dc2626;
+      --cor-atencao: #d97706;
+      --cor-ok: #16a34a;
+      --cor-neutro: #64748b;
+      --cor-bg: #f1f5f9;
+      --cor-card: #ffffff;
+      --cor-texto: #1e293b;
+      --cor-texto-claro: #64748b;
+      --sombra: 0 2px 12px rgba(0,0,0,0.08);
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--cor-bg);
+      color: var(--cor-texto);
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, var(--cor-primaria) 0%, var(--cor-secundaria) 100%);
+      color: white;
+      padding: 20px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .logo-area h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+    .logo-area p {
+      font-size: 0.78rem;
+      opacity: 0.7;
+      margin-top: 2px;
+    }
+    .header-meta {
+      font-size: 0.75rem;
+      opacity: 0.75;
+      text-align: right;
+    }
+    #btn-atualizar {
+      background: var(--cor-destaque);
+      color: var(--cor-primaria);
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity 0.2s;
+    }
+    #btn-atualizar:hover { opacity: 0.85; }
+    #btn-atualizar.carregando { opacity: 0.6; cursor: wait; }
+
+    /* FILTROS */
+    .filtros {
+      padding: 16px 24px;
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .busca {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+    .busca input {
+      width: 100%;
+      padding: 9px 14px 9px 38px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .busca input:focus { border-color: var(--cor-secundaria); }
+    .busca .icone-busca {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--cor-neutro);
+    }
+    .filtro-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1.5px solid #e2e8f0;
+      background: white;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--cor-texto-claro);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .filtro-btn.ativo {
+      background: var(--cor-primaria);
+      color: white;
+      border-color: var(--cor-primaria);
+    }
+    .filtro-btn:hover:not(.ativo) { border-color: var(--cor-secundaria); color: var(--cor-secundaria); }
+
+    /* RESUMO */
+    .resumo {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      padding: 20px 24px 0;
+    }
+    .card-resumo {
+      background: var(--cor-card);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--sombra);
+      text-align: center;
+      border-top: 4px solid transparent;
+    }
+    .card-resumo.total { border-color: var(--cor-secundaria); }
+    .card-resumo.urgente { border-color: var(--cor-urgente); }
+    .card-resumo.atencao { border-color: var(--cor-atencao); }
+    .card-resumo.ok { border-color: var(--cor-ok); }
+    .card-resumo .numero {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .card-resumo.total .numero { color: var(--cor-secundaria); }
+    .card-resumo.urgente .numero { color: var(--cor-urgente); }
+    .card-resumo.atencao .numero { color: var(--cor-atencao); }
+    .card-resumo.ok .numero { color: var(--cor-ok); }
+    .card-resumo .label {
+      font-size: 0.75rem;
+      color: var(--cor-texto-claro);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* LISTA DE PROCESSOS */
+    .container {
+      padding: 20px 24px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .secao-titulo {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--cor-texto-claro);
+      margin: 24px 0 12px;
+    }
+    .lista-processos {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    /* CARD DE PROCESSO */
+    .card-processo {
+      background: var(--cor-card);
+      border-radius: var(--radius);
+      box-shadow: var(--sombra);
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      border-left: 5px solid var(--cor-neutro);
+    }
+    .card-processo:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+    .card-processo.urgente { border-left-color: var(--cor-urgente); }
+    .card-processo.atencao { border-left-color: var(--cor-atencao); }
+    .card-processo.ok { border-left-color: var(--cor-ok); }
+    .card-processo.encerrado { border-left-color: var(--cor-neutro); opacity: 0.75; }
+
+    .card-header {
+      padding: 16px 16px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .processo-numero {
+      font-size: 0.78rem;
+      color: var(--cor-texto-claro);
+      font-family: monospace;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .processo-partes {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--cor-texto);
+      line-height: 1.3;
+    }
+    .processo-adverso {
+      font-size: 0.82rem;
+      color: var(--cor-texto-claro);
+      margin-top: 2px;
+    }
+    .badge-status {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .badge-ativo { background: #dbeafe; color: #1d4ed8; }
+    .badge-aguardando { background: #fef3c7; color: #92400e; }
+    .badge-encerrado { background: #f1f5f9; color: var(--cor-neutro); }
+    .badge-recurso { background: #ede9fe; color: #5b21b6; }
+    .badge-execucao { background: #dcfce7; color: #166534; }
+
+    .card-info {
+      padding: 0 16px 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tag-info {
+      font-size: 0.73rem;
+      background: #f1f5f9;
+      color: var(--cor-texto-claro);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .card-movimentacao {
+      padding: 10px 16px;
+      background: #f8fafc;
+      border-top: 1px solid #f1f5f9;
+    }
+    .movimentacao-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--cor-texto-claro);
+      margin-bottom: 4px;
+    }
+    .movimentacao-texto {
+      font-size: 0.84rem;
+      color: var(--cor-texto);
+      line-height: 1.4;
+    }
+
+    .card-acoes {
+      padding: 12px 16px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .acoes-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--cor-texto-claro);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .acao-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      background: #f8fafc;
+    }
+    .acao-item:last-child { margin-bottom: 0; }
+    .acao-item.urgente { background: #fef2f2; }
+    .acao-item.atencao { background: #fffbeb; }
+    .acao-item.ok { background: #f0fdf4; }
+
+    .acao-descricao {
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--cor-texto);
+      line-height: 1.3;
+    }
+    .acao-detalhe {
+      font-size: 0.76rem;
+      color: var(--cor-texto-claro);
+      margin-top: 2px;
+    }
+    .prazo-badge {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .prazo-data {
+      font-size: 0.72rem;
+      color: var(--cor-texto-claro);
+    }
+    .prazo-dias {
+      font-size: 0.85rem;
+      font-weight: 800;
+      display: block;
+      margin-top: 1px;
+    }
+    .prazo-dias.urgente { color: var(--cor-urgente); }
+    .prazo-dias.atencao { color: var(--cor-atencao); }
+    .prazo-dias.ok { color: var(--cor-ok); }
+    .prazo-dias.vencido { color: var(--cor-urgente); }
+    .prazo-dias.sem-prazo { color: var(--cor-neutro); font-size: 0.75rem; font-weight: 500; }
+
+    .sem-acoes {
+      font-size: 0.82rem;
+      color: var(--cor-texto-claro);
+      font-style: italic;
+      text-align: center;
+      padding: 6px 0;
+    }
+
+    /* MODAL */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .overlay.aberto { display: flex; justify-content: center; align-items: flex-start; }
+    .modal {
+      background: white;
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 680px;
+      margin: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .modal-header {
+      background: linear-gradient(135deg, var(--cor-primaria), var(--cor-secundaria));
+      color: white;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .modal-header h2 { font-size: 1.05rem; line-height: 1.4; }
+    .modal-header p { font-size: 0.8rem; opacity: 0.75; margin-top: 4px; }
+    .btn-fechar {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .btn-fechar:hover { background: rgba(255,255,255,0.3); }
+    .modal-body { padding: 24px; }
+    .modal-secao {
+      margin-bottom: 24px;
+    }
+    .modal-secao:last-child { margin-bottom: 0; }
+    .modal-secao-titulo {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--cor-texto-claro);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .grid-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .info-item .info-label {
+      font-size: 0.72rem;
+      color: var(--cor-texto-claro);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .info-item .info-valor {
+      font-size: 0.92rem;
+      color: var(--cor-texto);
+      margin-top: 3px;
+      font-weight: 500;
+    }
+    .modal-obs {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.88rem;
+      color: var(--cor-texto);
+      line-height: 1.5;
+    }
+
+    /* ESTADO VAZIO / CARREGANDO */
+    .estado-tela {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--cor-texto-claro);
+    }
+    .estado-tela .icone { font-size: 3rem; margin-bottom: 16px; }
+    .estado-tela h3 { font-size: 1.1rem; margin-bottom: 8px; color: var(--cor-texto); }
+    .estado-tela p { font-size: 0.88rem; max-width: 400px; margin: 0 auto; line-height: 1.6; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid #e2e8f0;
+      border-top-color: var(--cor-secundaria);
+      border-radius: 50%;
+      animation: girar 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes girar { to { transform: rotate(360deg); } }
+
+    /* ERRO DE CONFIGURAÇÃO */
+    .aviso-config {
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: var(--radius);
+      padding: 20px;
+      margin: 24px;
+      font-size: 0.88rem;
+      line-height: 1.7;
+    }
+    .aviso-config strong { color: var(--cor-urgente); }
+    .aviso-config code {
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-family: monospace;
+    }
+
+    /* RESPONSIVO */
+    @media (max-width: 600px) {
+      header { padding: 14px 16px; }
+      .filtros { padding: 12px 16px; }
+      .resumo { padding: 16px 16px 0; gap: 8px; }
+      .container { padding: 16px 16px 40px; }
+      .lista-processos { grid-template-columns: 1fr; }
+      .logo-area h1 { font-size: 1.1rem; }
+      .overlay { padding: 0; align-items: flex-end; }
+      .modal { border-radius: var(--radius) var(--radius) 0 0; max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo-area">
+      <h1>⚖️ Scozziero Advocacia</h1>
+      <p>Painel de Acompanhamento Processual</p>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <div class="header-meta" id="info-atualizacao">Carregando...</div>
+      <button id="btn-atualizar" onclick="carregarDados(true)">
+        <span id="icone-btn">↻</span> Atualizar
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="filtros">
+  <div class="busca">
+    <span class="icone-busca">🔍</span>
+    <input type="text" id="campo-busca" placeholder="Buscar processo, parte, número..." oninput="aplicarFiltros()">
+  </div>
+  <button class="filtro-btn ativo" onclick="setFiltro(this,'todos')" data-filtro="todos">Todos</button>
+  <button class="filtro-btn" onclick="setFiltro(this,'urgente')" data-filtro="urgente">🔴 Urgente</button>
+  <button class="filtro-btn" onclick="setFiltro(this,'atencao')" data-filtro="atencao">🟡 Atenção</button>
+  <button class="filtro-btn" onclick="setFiltro(this,'ok')" data-filtro="ok">🟢 Em dia</button>
+  <button class="filtro-btn" onclick="setFiltro(this,'encerrado')" data-filtro="encerrado">⚫ Encerrado</button>
+</div>
+
+<div class="resumo" id="resumo"></div>
+
+<div class="container">
+  <div id="conteudo-processos">
+    <div class="estado-tela">
+      <div class="spinner"></div>
+      <h3>Carregando processos...</h3>
+      <p>Buscando dados atualizados do repositório.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="fecharModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <h2 id="modal-titulo">—</h2>
+        <p id="modal-subtitulo">—</p>
+      </div>
+      <button class="btn-fechar" onclick="fecharModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-corpo"></div>
+  </div>
+</div>
+
+<script>
+  // ══════════════════════════════════════════════
+  // CONFIGURAÇÃO — altere apenas esta linha se mudar de repositório
+  // ══════════════════════════════════════════════
+  const REPO = 'gnscozziero-lang/acompprocesso';
+  const BRANCH = 'main';
+  const ARQUIVO_JSON = 'painel-processos/dados/processos.json';
+  const URL_DADOS = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${ARQUIVO_JSON}?t=${Date.now()}`;
+
+  // ══════════════════════════════════════════════
+  let todosProcessos = [];
+  let filtroAtivo = 'todos';
+
+  // ══════════════════════════════════════════════
+  // CARREGAR DADOS
+  // ══════════════════════════════════════════════
+  async function carregarDados(forcar = false) {
+    const btn = document.getElementById('btn-atualizar');
+    const icone = document.getElementById('icone-btn');
+    btn.classList.add('carregando');
+    icone.style.animation = 'girar 0.8s linear infinite';
+    icone.style.display = 'inline-block';
+
+    try {
+      const url = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${ARQUIVO_JSON}?t=${Date.now()}`;
+      const resp = await fetch(url, { cache: 'no-store' });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const dados = await resp.json();
+      todosProcessos = dados.processos || [];
+      renderizarResumo();
+      aplicarFiltros();
+      const dt = dados.ultima_atualizacao
+        ? new Date(dados.ultima_atualizacao).toLocaleString('pt-BR')
+        : '—';
+      document.getElementById('info-atualizacao').innerHTML = `Atualizado em:<br><strong>${dt}</strong>`;
+    } catch (e) {
+      mostrarErro(e);
+    } finally {
+      btn.classList.remove('carregando');
+      icone.style.animation = '';
+    }
+  }
+
+  // ══════════════════════════════════════════════
+  // URGÊNCIA
+  // ══════════════════════════════════════════════
+  function calcularUrgencia(processo) {
+    if (!processo.proximas_acoes || processo.proximas_acoes.length === 0) return 'ok';
+    if (processo.status === 'encerrado') return 'encerrado';
+    const hoje = new Date();
+    hoje.setHours(0,0,0,0);
+    let minDias = Infinity;
+    for (const a of processo.proximas_acoes) {
+      if (!a.prazo) continue;
+      const prazo = new Date(a.prazo + 'T00:00:00');
+      const dias = Math.ceil((prazo - hoje) / 86400000);
+      if (dias < minDias) minDias = dias;
+    }
+    if (minDias === Infinity) return 'ok';
+    if (minDias <= 3) return 'urgente';
+    if (minDias <= 10) return 'atencao';
+    return 'ok';
+  }
+
+  function diasParaPrazo(prazo) {
+    if (!prazo) return null;
+    const hoje = new Date();
+    hoje.setHours(0,0,0,0);
+    const dt = new Date(prazo + 'T00:00:00');
+    return Math.ceil((dt - hoje) / 86400000);
+  }
+
+  function labelDias(dias) {
+    if (dias === null) return { texto: 'sem prazo', classe: 'sem-prazo' };
+    if (dias < 0) return { texto: `vencido há ${Math.abs(dias)}d`, classe: 'vencido' };
+    if (dias === 0) return { texto: 'HOJE!', classe: 'urgente' };
+    if (dias === 1) return { texto: 'amanhã', classe: 'urgente' };
+    if (dias <= 3) return { texto: `${dias} dias`, classe: 'urgente' };
+    if (dias <= 10) return { texto: `${dias} dias`, classe: 'atencao' };
+    return { texto: `${dias} dias`, classe: 'ok' };
+  }
+
+  function formatarData(str) {
+    if (!str) return '—';
+    const [y, m, d] = str.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function badgeStatus(status) {
+    const mapa = {
+      em_andamento: ['ativo', 'Em Andamento'],
+      aguardando: ['aguardando', 'Aguardando'],
+      encerrado: ['encerrado', 'Encerrado'],
+      recurso: ['recurso', 'Recurso'],
+      execucao: ['execucao', 'Execução'],
+    };
+    const [cls, label] = mapa[status] || ['ativo', status || '—'];
+    return `<span class="badge-status badge-${cls}">${label}</span>`;
+  }
+
+  // ══════════════════════════════════════════════
+  // RESUMO
+  // ══════════════════════════════════════════════
+  function renderizarResumo() {
+    const total = todosProcessos.length;
+    const urgentes = todosProcessos.filter(p => calcularUrgencia(p) === 'urgente').length;
+    const atencao = todosProcessos.filter(p => calcularUrgencia(p) === 'atencao').length;
+    const ok = todosProcessos.filter(p => {
+      const u = calcularUrgencia(p);
+      return u === 'ok';
+    }).length;
+    document.getElementById('resumo').innerHTML = `
+      <div class="card-resumo total"><div class="numero">${total}</div><div class="label">Total de Processos</div></div>
+      <div class="card-resumo urgente"><div class="numero">${urgentes}</div><div class="label">🔴 Prazo Urgente</div></div>
+      <div class="card-resumo atencao"><div class="numero">${atencao}</div><div class="label">🟡 Requer Atenção</div></div>
+      <div class="card-resumo ok"><div class="numero">${ok}</div><div class="label">🟢 Em Dia</div></div>
+    `;
+  }
+
+  // ══════════════════════════════════════════════
+  // FILTROS
+  // ══════════════════════════════════════════════
+  function setFiltro(el, filtro) {
+    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('ativo'));
+    el.classList.add('ativo');
+    filtroAtivo = filtro;
+    aplicarFiltros();
+  }
+
+  function aplicarFiltros() {
+    const busca = document.getElementById('campo-busca').value.toLowerCase();
+    let lista = todosProcessos.filter(p => {
+      const urgencia = calcularUrgencia(p);
+      if (filtroAtivo !== 'todos' && urgencia !== filtroAtivo) return false;
+      if (!busca) return true;
+      const texto = [
+        p.numero_processo, p.partes?.cliente, p.partes?.adverso,
+        p.tipo, p.tribunal, p.vara, p.fase_atual
+      ].filter(Boolean).join(' ').toLowerCase();
+      return texto.includes(busca);
+    });
+    // Ordenar: urgente > atencao > ok > encerrado
+    const ordem = { urgente: 0, atencao: 1, ok: 2, encerrado: 3 };
+    lista.sort((a, b) => (ordem[calcularUrgencia(a)] || 99) - (ordem[calcularUrgencia(b)] || 99));
+    renderizarLista(lista);
+  }
+
+  // ══════════════════════════════════════════════
+  // RENDERIZAR LISTA
+  // ══════════════════════════════════════════════
+  function renderizarLista(lista) {
+    const cont = document.getElementById('conteudo-processos');
+    if (lista.length === 0) {
+      cont.innerHTML = `<div class="estado-tela">
+        <div class="icone">🔍</div>
+        <h3>Nenhum processo encontrado</h3>
+        <p>Tente ajustar os filtros ou a busca.</p>
+      </div>`;
+      return;
+    }
+    cont.innerHTML = `
+      <div class="secao-titulo">${lista.length} processo${lista.length !== 1 ? 's' : ''} encontrado${lista.length !== 1 ? 's' : ''}</div>
+      <div class="lista-processos">
+        ${lista.map((p, i) => renderizarCard(p, i)).join('')}
+      </div>
+    `;
+  }
+
+  function renderizarCard(p, idx) {
+    const urgencia = calcularUrgencia(p);
+    const acoes = p.proximas_acoes || [];
+
+    const acoesHtml = acoes.length === 0
+      ? `<p class="sem-acoes">Sem pendências identificadas</p>`
+      : acoes.slice(0, 3).map(a => {
+          const dias = diasParaPrazo(a.prazo);
+          const ld = labelDias(dias);
+          const cls = a.urgencia || (dias !== null && dias <= 3 ? 'urgente' : dias !== null && dias <= 10 ? 'atencao' : 'ok');
+          return `<div class="acao-item ${cls}">
+            <div>
+              <div class="acao-descricao">${a.acao}</div>
+              ${a.descricao ? `<div class="acao-detalhe">${a.descricao}</div>` : ''}
+            </div>
+            <div class="prazo-badge">
+              ${a.prazo ? `<div class="prazo-data">${formatarData(a.prazo)}</div>` : ''}
+              <span class="prazo-dias ${ld.classe}">${ld.texto}</span>
+            </div>
+          </div>`;
+        }).join('') + (acoes.length > 3 ? `<div class="acao-detalhe" style="text-align:center;margin-top:4px">+${acoes.length - 3} mais ação(ões)...</div>` : '');
+
+    return `<div class="card-processo ${urgencia}" onclick="abrirModal(${idx})">
+      <div class="card-header">
+        <div>
+          <div class="processo-numero">${p.numero_processo || 'Nº não identificado'}</div>
+          <div class="processo-partes">${p.partes?.cliente || '—'}</div>
+          <div class="processo-adverso">vs. ${p.partes?.adverso || '—'}</div>
+        </div>
+        ${badgeStatus(p.status)}
+      </div>
+      <div class="card-info">
+        ${p.tipo ? `<span class="tag-info">${p.tipo}</span>` : ''}
+        ${p.tribunal ? `<span class="tag-info">${p.tribunal}</span>` : ''}
+        ${p.vara ? `<span class="tag-info">${p.vara}</span>` : ''}
+        ${p.fase_atual ? `<span class="tag-info">${p.fase_atual}</span>` : ''}
+      </div>
+      ${p.ultima_movimentacao ? `<div class="card-movimentacao">
+        <div class="movimentacao-label">Última movimentação${p.ultima_movimentacao.data ? ' — ' + formatarData(p.ultima_movimentacao.data) : ''}</div>
+        <div class="movimentacao-texto">${p.ultima_movimentacao.descricao || '—'}</div>
+      </div>` : ''}
+      <div class="card-acoes">
+        <div class="acoes-label">⚡ Próximas ações</div>
+        ${acoesHtml}
+      </div>
+    </div>`;
+  }
+
+  // ══════════════════════════════════════════════
+  // MODAL DE DETALHES
+  // ══════════════════════════════════════════════
+  let processosFiltradosAtual = [];
+
+  function abrirModal(idx) {
+    const lista = document.querySelectorAll('.card-processo');
+    // Descobrir qual processo pelo índice no DOM
+    const p = obterProcessosFiltrados()[idx];
+    if (!p) return;
+    document.getElementById('modal-titulo').textContent = p.partes?.cliente || '—';
+    document.getElementById('modal-subtitulo').textContent = `vs. ${p.partes?.adverso || '—'} — ${p.numero_processo || ''}`;
+
+    const acoes = (p.proximas_acoes || []).map(a => {
+      const dias = diasParaPrazo(a.prazo);
+      const ld = labelDias(dias);
+      const cls = a.urgencia || (dias !== null && dias <= 3 ? 'urgente' : dias !== null && dias <= 10 ? 'atencao' : 'ok');
+      return `<div class="acao-item ${cls}">
+        <div>
+          <div class="acao-descricao">${a.acao}</div>
+          ${a.descricao ? `<div class="acao-detalhe">${a.descricao}</div>` : ''}
+        </div>
+        <div class="prazo-badge">
+          ${a.prazo ? `<div class="prazo-data">${formatarData(a.prazo)}</div>` : ''}
+          <span class="prazo-dias ${ld.classe}">${ld.texto}</span>
+        </div>
+      </div>`;
+    }).join('') || `<p class="sem-acoes">Sem pendências identificadas</p>`;
+
+    document.getElementById('modal-corpo').innerHTML = `
+      <div class="modal-secao">
+        <div class="modal-secao-titulo">Dados do Processo</div>
+        <div class="grid-info">
+          <div class="info-item"><div class="info-label">Número</div><div class="info-valor">${p.numero_processo || '—'}</div></div>
+          <div class="info-item"><div class="info-label">Tipo</div><div class="info-valor">${p.tipo || '—'}</div></div>
+          <div class="info-item"><div class="info-label">Tribunal</div><div class="info-valor">${p.tribunal || '—'}</div></div>
+          <div class="info-item"><div class="info-label">Vara</div><div class="info-valor">${p.vara || '—'}</div></div>
+          <div class="info-item"><div class="info-label">Fase Atual</div><div class="info-valor">${p.fase_atual || '—'}</div></div>
+          <div class="info-item"><div class="info-label">Status</div><div class="info-valor">${badgeStatus(p.status)}</div></div>
+          <div class="info-item"><div class="info-label">Cliente (polo ${p.partes?.polo || '?'})</div><div class="info-valor">${p.partes?.cliente || '—'}</div></div>
+          <div class="info-item"><div class="info-label">Parte Adversa</div><div class="info-valor">${p.partes?.adverso || '—'}</div></div>
+        </div>
+      </div>
+      ${p.ultima_movimentacao ? `<div class="modal-secao">
+        <div class="modal-secao-titulo">Última Movimentação${p.ultima_movimentacao.data ? ' — ' + formatarData(p.ultima_movimentacao.data) : ''}</div>
+        <p style="font-size:0.9rem;line-height:1.6;color:var(--cor-texto)">${p.ultima_movimentacao.descricao || '—'}</p>
+      </div>` : ''}
+      <div class="modal-secao">
+        <div class="modal-secao-titulo">⚡ Próximas Ações e Prazos</div>
+        ${acoes}
+      </div>
+      ${p.observacoes ? `<div class="modal-secao">
+        <div class="modal-secao-titulo">Observações</div>
+        <div class="modal-obs">${p.observacoes}</div>
+      </div>` : ''}
+      <div style="font-size:0.72rem;color:var(--cor-texto-claro);margin-top:12px;text-align:right">
+        Análise gerada em: ${p.ultima_analise ? new Date(p.ultima_analise).toLocaleString('pt-BR') : '—'}<br>
+        Arquivo: ${p.arquivo_origem || '—'}
+      </div>
+    `;
+    document.getElementById('overlay').classList.add('aberto');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function obterProcessosFiltrados() {
+    const busca = document.getElementById('campo-busca').value.toLowerCase();
+    let lista = todosProcessos.filter(p => {
+      const urgencia = calcularUrgencia(p);
+      if (filtroAtivo !== 'todos' && urgencia !== filtroAtivo) return false;
+      if (!busca) return true;
+      const texto = [p.numero_processo, p.partes?.cliente, p.partes?.adverso, p.tipo, p.tribunal, p.vara, p.fase_atual].filter(Boolean).join(' ').toLowerCase();
+      return texto.includes(busca);
+    });
+    const ordem = { urgente: 0, atencao: 1, ok: 2, encerrado: 3 };
+    lista.sort((a, b) => (ordem[calcularUrgencia(a)] || 99) - (ordem[calcularUrgencia(b)] || 99));
+    return lista;
+  }
+
+  function fecharModal(e) {
+    if (e && e.target !== document.getElementById('overlay')) return;
+    document.getElementById('overlay').classList.remove('aberto');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharModal(); });
+
+  // ══════════════════════════════════════════════
+  // ERRO
+  // ══════════════════════════════════════════════
+  function mostrarErro(e) {
+    document.getElementById('info-atualizacao').textContent = 'Erro ao carregar';
+    document.getElementById('conteudo-processos').innerHTML = `
+      <div class="aviso-config">
+        <strong>⚠ Não foi possível carregar os dados dos processos.</strong><br><br>
+        Isso pode acontecer porque:<br>
+        • O arquivo <code>painel-processos/dados/processos.json</code> ainda não existe no repositório<br>
+        • O repositório ainda não está configurado<br>
+        • GitHub Pages ainda não está ativado<br><br>
+        <strong>Erro técnico:</strong> ${e.message}<br><br>
+        Siga as instruções do <code>SETUP.md</code> para concluir a configuração.
+      </div>`;
+  }
+
+  // Iniciar
+  carregarDados();
+  // Recarregar automaticamente a cada 5 minutos
+  setInterval(() => carregarDados(), 300000);
+</script>
+</body>
+</html>

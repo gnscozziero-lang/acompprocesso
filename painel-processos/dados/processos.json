@@ -1,0 +1,35 @@
+{
+  "ultima_atualizacao": "2026-04-23T10:00:00",
+  "total_arquivos_analisados": 0,
+  "processos": [
+    {
+      "id": "exemplo-001",
+      "numero_processo": "0000001-00.2026.8.26.0000",
+      "arquivo_origem": "exemplo_processo.pdf",
+      "partes": {
+        "cliente": "Exemplo Cliente",
+        "adverso": "Exemplo Réu",
+        "polo": "ativo"
+      },
+      "tipo": "Cível",
+      "tribunal": "TJSP",
+      "vara": "1ª Vara Cível",
+      "status": "em_andamento",
+      "fase_atual": "Conhecimento",
+      "ultima_movimentacao": {
+        "data": "2026-04-20",
+        "descricao": "Este é um processo de exemplo. Substitua adicionando PDFs reais na pasta e executando o script de análise."
+      },
+      "proximas_acoes": [
+        {
+          "acao": "Configurar o sistema",
+          "prazo": "2026-04-30",
+          "urgencia": "urgente",
+          "descricao": "Execute o script analisar_processos.py após adicionar PDFs reais na pasta Acomp.Processual"
+        }
+      ],
+      "observacoes": "Este é um registro de demonstração. Após executar o script de análise com seus PDFs reais, ele será substituído pelos dados reais de cada processo.",
+      "ultima_analise": "2026-04-23T10:00:00"
+    }
+  ]
+}
