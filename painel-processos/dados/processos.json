@@ -1,35 +1,53 @@
 {
-  "ultima_atualizacao": "2026-04-23T10:00:00",
-  "total_arquivos_analisados": 0,
+  "ultima_atualizacao": "2026-04-23T15:35:07.009386",
+  "total_arquivos_analisados": 1,
   "processos": [
     {
-      "id": "exemplo-001",
-      "numero_processo": "0000001-00.2026.8.26.0000",
-      "arquivo_origem": "exemplo_processo.pdf",
+      "id": "b495710366af",
+      "arquivo_origem": "0001388-46_1.pdf",
+      "ultima_analise": "2026-04-23T15:35:07.009147",
+      "numero_processo": "0001388-46.2025.8.16.0193",
       "partes": {
-        "cliente": "Exemplo Cliente",
-        "adverso": "Exemplo Réu",
+        "cliente": "AGAU EQUIPAMENTOS DE MEDICAO LTDA",
+        "adverso": "KAMILE COX AQUECEDORES LTDA",
         "polo": "ativo"
       },
       "tipo": "Cível",
-      "tribunal": "TJSP",
-      "vara": "1ª Vara Cível",
+      "tribunal": "TJPR",
+      "vara": "1ª Vara Cível de Colombo",
       "status": "em_andamento",
-      "fase_atual": "Conhecimento",
-      "ultima_movimentacao": {
-        "data": "2026-04-20",
-        "descricao": "Este é um processo de exemplo. Substitua adicionando PDFs reais na pasta e executando o script de análise."
-      },
-      "proximas_acoes": [
+      "fase_atual": "Conhecimento - Petição Inicial",
+      "movimentacoes": [
         {
-          "acao": "Configurar o sistema",
-          "prazo": "2026-04-30",
-          "urgencia": "urgente",
-          "descricao": "Execute o script analisar_processos.py após adicionar PDFs reais na pasta Acomp.Processual"
+          "data": "2025-05-14",
+          "descricao": "JUNTADA DE PETIÇÃO DE INICIAL - Por: GUILHERME SCOZZIERO NETO - Documentos: Petição Inicial, Comprovante de CNPJ, CPF, Procuração, Contrato Social, NOTA FISCAL (4), COMPR.ENTREGA (4), Instrum.Protesto (4), Cálculo"
+        },
+        {
+          "data": "2025-05-15",
+          "descricao": "Distribuição Automática - Processo distribuído à 1ª Vara Cível de Colombo"
         }
       ],
-      "observacoes": "Este é um registro de demonstração. Após executar o script de análise com seus PDFs reais, ele será substituído pelos dados reais de cada processo.",
-      "ultima_analise": "2026-04-23T10:00:00"
+      "proximas_acoes": [
+        {
+          "acao": "Aguardar despacho inicial",
+          "prazo": null,
+          "urgencia": "ok",
+          "descricao": "Aguardar análise da petição inicial pelo Juízo e expedição do mandado de pagamento monitório conforme art. 701 do CPC"
+        },
+        {
+          "acao": "Acompanhar citação da ré",
+          "prazo": null,
+          "urgencia": "atencao",
+          "descricao": "Após deferimento da inicial, acompanhar a citação da ré KAMILE COX AQUECEDORES LTDA para cumprimento do mandado monitório no prazo de 15 dias"
+        },
+        {
+          "acao": "Verificar custas processuais",
+          "prazo": null,
+          "urgencia": "atencao",
+          "descricao": "Verificar se há pendência de recolhimento de custas iniciais para regular processamento do feito"
+        }
+      ],
+      "observacoes": "Ação Monitória fundada em duplicatas mercantis vencidas (títulos 202478-2, 202826-1, 203634-2 e 204099-1) no valor original de R$ 8.956,84, com valor atualizado de R$ 14.137,37. As duplicatas foram protestadas e estão acompanhadas de notas fiscais e comprovantes de entrega das mercadorias. A autora declarou não ter interesse em audiência de conciliação."
     }
   ]
 }
