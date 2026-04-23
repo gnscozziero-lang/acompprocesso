@@ -126,7 +126,7 @@ def analisar_processo_com_claude(nome_arquivo, texto_pdf):
     cliente = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
     prompt = f"""Você é um assistente jurídico especializado em direito processual brasileiro.
-Analise o documento abaixo e extraia as informações processuais de forma estruturada.
+Analise o documento abaixo e extraia TODAS as informações processuais de forma estruturada.
 
 DOCUMENTO: {nome_arquivo}
 CONTEÚDO:
@@ -145,10 +145,12 @@ Responda EXCLUSIVAMENTE em JSON válido, sem texto adicional, seguindo exatament
   "vara": "identificação da vara ou juízo",
   "status": "em_andamento | aguardando | encerrado | recurso | execucao",
   "fase_atual": "fase processual atual (ex: Conhecimento, Instrução, Sentença, Recurso, Execução)",
-  "ultima_movimentacao": {{
-    "data": "AAAA-MM-DD ou null",
-    "descricao": "descrição objetiva da última movimentação relevante"
-  }},
+  "movimentacoes": [
+    {{
+      "data": "AAAA-MM-DD",
+      "descricao": "descrição completa da movimentação exatamente como consta no documento"
+    }}
+  ],
   "proximas_acoes": [
     {{
       "acao": "nome curto da ação necessária",
@@ -160,14 +162,17 @@ Responda EXCLUSIVAMENTE em JSON válido, sem texto adicional, seguindo exatament
   "observacoes": "resumo do contexto do processo em 2-3 frases objetivas"
 }}
 
-REGRAS IMPORTANTES:
-- Datas SEMPRE no formato AAAA-MM-DD
+REGRAS CRÍTICAS:
+- Em "movimentacoes": liste TODAS as movimentações encontradas no documento, em ordem cronológica (mais antiga primeiro, mais recente por último)
+- A movimentação mais recente (última do array) deve ser a de data mais alta — verifique cuidadosamente as datas
+- Datas SEMPRE no formato AAAA-MM-DD — converta datas em outros formatos (ex: 16/04/2026 → 2026-04-16)
 - Se o prazo for calculado a partir de uma data de decisão, some os dias úteis
-- Liste TODAS as ações necessárias, mesmo as sem prazo definido
+- Liste TODAS as próximas ações necessárias, mesmo as sem prazo definido
 - proximas_acoes deve conter no mínimo 1 item se o processo estiver ativo
 - Se o processo estiver encerrado, proximas_acoes pode ser []
 - Para prazos processuais: intimação → citar tipo de prazo (contestação=15 dias, recurso ordinário=15 dias, etc.)
-- O campo "cliente" deve ser a parte que o escritório Scozziero Advocacia representa"""
+- O campo "cliente" deve ser a parte que o escritório Scozziero Advocacia representa
+- Analise com atenção o conteúdo completo do documento para não perder movimentações recentes"""
 
     try:
         resposta = cliente.messages.create(
@@ -281,7 +286,12 @@ def main():
         return
 
     # Criar índice dos processos existentes por ID
-    indice_processos = {p["id"]: p for p in dados_atuais.get("processos", []) if "id" in p}
+    # Filtrar o processo de exemplo (não deve persistir após a primeira execução real)
+    IDS_EXEMPLO = {"exemplo-001"}
+    indice_processos = {
+        p["id"]: p for p in dados_atuais.get("processos", [])
+        if "id" in p and p["id"] not in IDS_EXEMPLO
+    }
 
     # Analisar cada arquivo modificado
     for i, nome_pdf in enumerate(arquivos_modificados, 1):

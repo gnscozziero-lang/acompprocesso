@@ -1,6 +1,6 @@
 {
-  "ultima_atualizacao": "2026-04-23T15:22:35.346372",
-  "total_arquivos_analisados": 1,
+  "ultima_atualizacao": "2026-04-23T10:00:00",
+  "total_arquivos_analisados": 0,
   "processos": [
     {
       "id": "exemplo-001",
@@ -30,47 +30,6 @@
       ],
       "observacoes": "Este é um registro de demonstração. Após executar o script de análise com seus PDFs reais, ele será substituído pelos dados reais de cada processo.",
       "ultima_analise": "2026-04-23T10:00:00"
-    },
-    {
-      "id": "b495710366af",
-      "arquivo_origem": "0001388-46_1.pdf",
-      "ultima_analise": "2026-04-23T15:22:35.345977",
-      "numero_processo": "0001388-46.2025.8.16.0193",
-      "partes": {
-        "cliente": "AGAU EQUIPAMENTOS DE MEDICAO LTDA",
-        "adverso": "KAMILE COX AQUECEDORES LTDA",
-        "polo": "ativo"
-      },
-      "tipo": "Cível",
-      "tribunal": "TJPR",
-      "vara": "1ª Vara Cível de Colombo",
-      "status": "em_andamento",
-      "fase_atual": "Conhecimento - Inicial Distribuída",
-      "ultima_movimentacao": {
-        "data": "2025-05-14",
-        "descricao": "Juntada de petição inicial com documentos (notas fiscais, comprovantes de entrega, instrumentos de protesto e cálculo)"
-      },
-      "proximas_acoes": [
-        {
-          "acao": "Aguardar despacho inicial",
-          "prazo": null,
-          "urgencia": "ok",
-          "descricao": "Aguardar análise da petição inicial pelo juízo e eventual expedição do mandado monitório para citação da ré, conforme art. 701 do CPC"
-        },
-        {
-          "acao": "Monitorar citação da ré",
-          "prazo": null,
-          "urgencia": "ok",
-          "descricao": "Após expedição do mandado monitório, acompanhar a citação da ré KAMILE COX AQUECEDORES LTDA para pagamento em 15 dias ou apresentação de embargos"
-        },
-        {
-          "acao": "Verificar recolhimento de custas",
-          "prazo": null,
-          "urgencia": "atencao",
-          "descricao": "Confirmar se as custas iniciais foram devidamente recolhidas para evitar intimação para regularização"
-        }
-      ],
-      "observacoes": "Ação monitória fundada em duplicatas mercantis vencidas (4 títulos) no valor original de R$ 8.956,84, atualizado para R$ 14.137,37. As duplicatas estão acompanhadas de notas fiscais, comprovantes de entrega e instrumentos de protesto. Processo recém-distribuído, aguardando despacho inicial para expedição de mandado monitório."
     }
   ]
 }

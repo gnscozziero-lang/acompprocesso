@@ -273,6 +273,30 @@
       color: var(--cor-texto);
       line-height: 1.4;
     }
+    /* Lista completa de movimentações no modal */
+    .mov-lista { display: flex; flex-direction: column; gap: 8px; }
+    .mov-item {
+      display: flex;
+      gap: 12px;
+      padding: 10px 12px;
+      background: #f8fafc;
+      border-radius: 8px;
+      border-left: 3px solid #e2e8f0;
+    }
+    .mov-item:last-child { border-left-color: var(--cor-secundaria); background: #eff6ff; }
+    .mov-data {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--cor-texto-claro);
+      white-space: nowrap;
+      min-width: 80px;
+      padding-top: 2px;
+    }
+    .mov-desc {
+      font-size: 0.85rem;
+      color: var(--cor-texto);
+      line-height: 1.5;
+    }
 
     .card-acoes {
       padding: 12px 16px;
@@ -743,10 +767,15 @@
         ${p.vara ? `<span class="tag-info">${p.vara}</span>` : ''}
         ${p.fase_atual ? `<span class="tag-info">${p.fase_atual}</span>` : ''}
       </div>
-      ${p.ultima_movimentacao ? `<div class="card-movimentacao">
-        <div class="movimentacao-label">Última movimentação${p.ultima_movimentacao.data ? ' — ' + formatarData(p.ultima_movimentacao.data) : ''}</div>
-        <div class="movimentacao-texto">${p.ultima_movimentacao.descricao || '—'}</div>
-      </div>` : ''}
+      ${(() => {
+        // Suporte a novo formato (movimentacoes[]) e legado (ultima_movimentacao)
+        const movs = p.movimentacoes && p.movimentacoes.length > 0 ? p.movimentacoes : null;
+        const ultima = movs ? movs[movs.length - 1] : p.ultima_movimentacao;
+        return ultima ? `<div class="card-movimentacao">
+          <div class="movimentacao-label">Última movimentação${ultima.data ? ' — ' + formatarData(ultima.data) : ''}</div>
+          <div class="movimentacao-texto">${ultima.descricao || '—'}</div>
+        </div>` : '';
+      })()}
       <div class="card-acoes">
         <div class="acoes-label">⚡ Próximas ações</div>
         ${acoesHtml}
@@ -797,10 +826,20 @@
           <div class="info-item"><div class="info-label">Parte Adversa</div><div class="info-valor">${p.partes?.adverso || '—'}</div></div>
         </div>
       </div>
-      ${p.ultima_movimentacao ? `<div class="modal-secao">
-        <div class="modal-secao-titulo">Última Movimentação${p.ultima_movimentacao.data ? ' — ' + formatarData(p.ultima_movimentacao.data) : ''}</div>
-        <p style="font-size:0.9rem;line-height:1.6;color:var(--cor-texto)">${p.ultima_movimentacao.descricao || '—'}</p>
-      </div>` : ''}
+      ${(() => {
+        const movs = p.movimentacoes && p.movimentacoes.length > 0 ? p.movimentacoes : (p.ultima_movimentacao ? [p.ultima_movimentacao] : []);
+        if (movs.length === 0) return '';
+        const itens = [...movs].reverse().map(m =>
+          `<div class="mov-item">
+            <div class="mov-data">${m.data ? formatarData(m.data) : '—'}</div>
+            <div class="mov-desc">${m.descricao || '—'}</div>
+          </div>`
+        ).join('');
+        return `<div class="modal-secao">
+          <div class="modal-secao-titulo">📋 Movimentações (${movs.length} — mais recente primeiro)</div>
+          <div class="mov-lista">${itens}</div>
+        </div>`;
+      })()}
       <div class="modal-secao">
         <div class="modal-secao-titulo">⚡ Próximas Ações e Prazos</div>
         ${acoes}
